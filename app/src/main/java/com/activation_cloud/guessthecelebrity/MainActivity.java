@@ -16,6 +16,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button button01;
     Button button02;
     Button button03;
+    ProgressBar prBar;
 
     String RESULT="";
     DownloadTask taskUrls = null;
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     boolean isNotConnection = false;
 
-    public class DownloadTask extends AsyncTask<String,Void,String>
+    public class DownloadTask extends AsyncTask<String,Integer,String>
     {
 
         @Override
@@ -70,11 +72,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 InputStreamReader reader = new InputStreamReader(in);
 
                 int data = reader.read();
+                int count =0;
                 while(data != -1)
                 {
                     char current = (char)data;
                     result += current;
                     data = reader.read();
+                    count++;
+                    publishProgress(count);
                 }
                 return result;
 
@@ -92,10 +97,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         @Override
+        protected void onProgressUpdate(Integer... progress) {
+
+            //Log.i("PROGRESS",progress[0].toString());
+            super.onProgressUpdate(progress);
+
+            prBar.setProgress(progress[0]);
+        }
+
+        @Override
         protected  void onPreExecute()
         {
             super.onPreExecute();
             webView.setVisibility(View.VISIBLE);
+            prBar.setProgress(0);
+            prBar.setVisibility(View.VISIBLE);
             imgView.setVisibility(View.INVISIBLE);
             button00.setVisibility(View.INVISIBLE);
             button01.setVisibility(View.INVISIBLE);
@@ -112,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 InitUrlsArray();
                 DownLoadImage();
                 webView.setVisibility(View.INVISIBLE);
+                prBar.setVisibility(View.INVISIBLE);
                 imgView.setVisibility(View.VISIBLE);
                 Log.i("INFO", "onPostExecute TaskDownloader");
             }
@@ -218,6 +235,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button03 = (Button)findViewById(com.activation_cloud.guessthecelebrity.R.id.button03);
         button03.setOnClickListener(this);
 
+        prBar = (ProgressBar)findViewById(R.id.progressBar);
+        prBar.setMax(61885);
         InitUrlsResult();
 
     }
